@@ -84,7 +84,7 @@ def main():
     # Open the images
     tessellations = Image.open("temp/hexagons_tessellation.png")
     tessellations = tessellations.transpose(method=Image.FLIP_LEFT_RIGHT)  # Flip the image to match Roll20
-    background = Image.open("test_img.png")
+    background = Image.open("background_img.png")
 
     # Load the json of text mappings
     with open('data.json') as f:
