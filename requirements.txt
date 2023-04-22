@@ -1,5 +1,4 @@
-turtle
 canvasvg
 cairosvg
 Pillow
-tkinter
+pygame
