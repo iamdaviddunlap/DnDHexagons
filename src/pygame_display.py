@@ -2,13 +2,8 @@ import pygame
 import sys
 from pygame.locals import *
 
-# Initialize Pygame
-pygame.init()
-
 # Constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-BACKGROUND_COLOR = (255, 255, 255)
+BACKGROUND_COLOR = (0, 0, 0)
 TOOLTIP_TEXT_COLOR = (0, 0, 0)
 TOOLTIP_BACKGROUND_COLOR = (200, 200, 200)
 TOOLTIP_BORDER_COLOR = (0, 0, 0)
@@ -17,36 +12,30 @@ TOOLTIP_PADDING = 5
 TOOLTIP_FONT_SIZE = 20
 TOOLTIP_FONT_STYLE = 'freesansbold.ttf'
 
-# Load your image
-image_path = 'temp/overlay.png'
-image = pygame.image.load(image_path)
-image_rect = image.get_rect()
-
-# Scale the game window
-monitor = pygame.display.Info()
-monitor_size = (monitor.current_w, monitor.current_h)
-
-# Calculate the scale factor
-scale_factor = min(monitor_size[0] / image_rect.width, monitor_size[1] / image_rect.height)
-
-# Scale the image and update the rect
-scaled_image = pygame.transform.smoothscale(image, (round(image_rect.width * scale_factor), round(image_rect.height * scale_factor)))
-scaled_rect = scaled_image.get_rect()
-
-# Create the screen (game window)
-screen = pygame.display.set_mode((scaled_rect.width, scaled_rect.height))
 
 def display_tooltip(screen, text, pos):
-    font_size = 24
-    font_color = (0, 0, 0)
-    font_type = 'freesansbold.ttf'
-    bg_color = (230, 230, 230)
-    font = pygame.font.Font(font_type, font_size)
-    tooltip_text = font.render(text, True, font_color, bg_color)
+    font = pygame.font.Font(TOOLTIP_FONT_STYLE, TOOLTIP_FONT_SIZE)
+    tooltip_text = font.render(text, True, TOOLTIP_TEXT_COLOR, TOOLTIP_BACKGROUND_COLOR)
     tooltip_rect = tooltip_text.get_rect()
 
     tooltip_rect.topleft = pos
     screen.blit(tooltip_text, tooltip_rect)
+
+
+def resize_window(width, height):
+    global screen, image_rect, scaled_image, scaled_rect, scale_factor
+
+    # Calculate new height while keeping the aspect ratio constant
+    new_height = int(width * image_rect.height / image_rect.width)
+
+    # Update screen size
+    screen = pygame.display.set_mode((width, new_height), pygame.RESIZABLE)
+
+    # Update scale factor and image
+    scale_factor = width / image_rect.width
+    scaled_image = pygame.transform.smoothscale(image, (round(image_rect.width * scale_factor), round(image_rect.height * scale_factor)))
+    scaled_rect = scaled_image.get_rect()
+
 
 def run_pygame_display(coord_to_txt):
     # Points of interest and tooltip mapping
@@ -58,6 +47,9 @@ def run_pygame_display(coord_to_txt):
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == VIDEORESIZE:
+                width, height = event.w, event.h
+                resize_window(width, height)
 
         # Clear the screen
         screen.fill(BACKGROUND_COLOR)
@@ -76,3 +68,32 @@ def run_pygame_display(coord_to_txt):
 
         # Update the screen
         pygame.display.flip()
+
+
+if __name__ == '__main__':
+    # Initialize Pygame
+    pygame.init()
+
+    # Load your image
+    image_path = 'temp/overlay.png'
+    image = pygame.image.load(image_path)
+    image_rect = image.get_rect()
+
+    # Calculate default window size
+    monitor = pygame.display.Info()
+    default_window_width = int(monitor.current_w * 0.75)
+    default_window_height = int(default_window_width * image_rect.height / image_rect.width)
+
+    # Initialize scaled_image and scaled_rect
+    scaled_image = image
+    scaled_rect = image_rect
+
+    # Create the screen (game window)
+    screen = pygame.display.set_mode((default_window_width, default_window_height), pygame.RESIZABLE)
+
+    # Initialize the scaled_image, scaled_rect, and scale_factor with the default window size
+    resize_window(default_window_width, default_window_height)
+
+    coord_to_txt = {(35, 43): 'some text for A1\nand some on a new line', (65, 97): 'some text for B2',
+                    (35, 149): 'some text for C1', (1403, 363): "I'm closer to the middle\n\n\n\n\n\n\n\n\n:)"}
+    run_pygame_display(coord_to_txt)
