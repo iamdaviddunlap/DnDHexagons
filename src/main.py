@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from string import ascii_uppercase
 import json
-from pygame_display import run_pygame_display
+from pygame_display import run_pygame_display, init_pygame, init_game_screen, load_image
 
 from generate_hexagons import create_hex_png
 
@@ -95,13 +95,20 @@ def main():
 
     # Populate the overlay image with text
     overlay, populated_hexes = add_text_to_overlay(overlay, num_hex_tall, num_hex_wide, mapping)
-    coord_to_txt = {populated_hexes[key]: mapping[key] for key in populated_hexes}
+    coord_to_txt_metadata = {populated_hexes[key]: mapping[key] for key in populated_hexes}
 
-    print(coord_to_txt)
+    print(coord_to_txt_metadata)
 
     overlay.save('temp/overlay.png')
 
-    run_pygame_display(coord_to_txt)
+    ##### PYGAME #####
+
+    init_pygame()
+    load_image('temp/overlay.png')
+
+    init_game_screen()
+
+    run_pygame_display(coord_to_txt_metadata)
 
 
 if __name__ == '__main__':
