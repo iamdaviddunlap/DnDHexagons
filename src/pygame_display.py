@@ -15,11 +15,27 @@ TOOLTIP_FONT_STYLE = 'freesansbold.ttf'
 
 def display_tooltip(screen, text, pos):
     font = pygame.font.Font(TOOLTIP_FONT_STYLE, TOOLTIP_FONT_SIZE)
-    tooltip_text = font.render(text, True, TOOLTIP_TEXT_COLOR, TOOLTIP_BACKGROUND_COLOR)
-    tooltip_rect = tooltip_text.get_rect()
+    lines = text.split('\n')
+    line_height = font.get_linesize()
 
-    tooltip_rect.topleft = pos
-    screen.blit(tooltip_text, tooltip_rect)
+    padding = 5  # You can change this value to adjust the padding
+    max_line_width = max(font.size(line)[0] for line in lines) + 2 * padding
+    total_height = line_height * len(lines) + 2 * padding
+
+    # Create a background surface and fill it with the background color
+    background_surface = pygame.Surface((max_line_width, total_height), pygame.SRCALPHA)
+    background_surface.fill(TOOLTIP_BACKGROUND_COLOR)
+    screen.blit(background_surface, pos)
+
+    tooltip_rect = None
+    for index, line in enumerate(lines):
+        tooltip_text = font.render(line, True, TOOLTIP_TEXT_COLOR)
+        if tooltip_rect is None:
+            tooltip_rect = tooltip_text.get_rect()
+            tooltip_rect.topleft = (pos[0] + padding, pos[1] + padding)
+        else:
+            tooltip_rect.top += line_height
+        screen.blit(tooltip_text, tooltip_rect)
 
 
 def resize_window(width, height):
